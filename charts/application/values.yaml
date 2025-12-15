@@ -1,0 +1,9 @@
+config:
+  docker_registry: sfabricito
+  embeddingApi:
+    name: embedding-api
+    replicas: 1
+    image: embedding-api
+    tag: "latest"
+    pullPolicy: IfNotPresent
+    port: 8000

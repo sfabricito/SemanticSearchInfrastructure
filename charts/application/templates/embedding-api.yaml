@@ -1,0 +1,64 @@
+{{- $component := .Values.config.embeddingApi.name | lower }}
+{{- $name := printf "%s-%s" .Release.Name $component | trunc 63 | trimSuffix "-" }}
+{{- $pvcName := printf "%s-data" $name | trunc 63 | trimSuffix "-" }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $pvcName }}
+  labels:
+    app: {{ $name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    app: {{ $name }}
+spec:
+  replicas: {{ .Values.config.embeddingApi.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+    spec:
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ $pvcName }}
+      containers:
+      - name: {{ $component }}
+        volumeMounts:
+          - mountPath: "/data"
+            name: data
+        image: {{ .Values.config.docker_registry }}/{{ .Values.config.embeddingApi.image }}:{{ .Values.config.embeddingApi.tag }}
+        imagePullPolicy: {{ .Values.config.embeddingApi.pullPolicy }}
+        ports:
+          - containerPort: {{ .Values.config.embeddingApi.port }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  labels:
+    app: {{ $name }}
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.config.embeddingApi.port }}
+      targetPort: {{ .Values.config.embeddingApi.port }}
+  selector:
+    app: {{ $name }}
