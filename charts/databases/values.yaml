@@ -1,0 +1,17 @@
+
+qdrant:
+  enabled: true
+  service:
+    type: ClusterIP
+    httpPort: 6333
+    grpcPort: 6334
+  persistence:
+    enabled: true
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
