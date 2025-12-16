@@ -1,0 +1,27 @@
+{{- if .Values.sparkAccess.enabled }}
+{{- $namespace := default .Release.Namespace .Values.sparkAccess.namespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $namespace }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.sparkAccess.serviceAccountName }}
+  namespace: {{ $namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ printf "%s-%s-access" .Release.Name .Values.sparkAccess.serviceAccountName | trunc 63 | trimSuffix "-" }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ default "edit" .Values.sparkAccess.clusterRole }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.sparkAccess.serviceAccountName }}
+    namespace: {{ $namespace }}
+{{- end }}

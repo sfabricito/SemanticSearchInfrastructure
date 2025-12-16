@@ -1,0 +1,42 @@
+sparkOperator:
+  enabled: true
+  sparkJobNamespace: spark-apps
+  webhook:
+    enable: true
+  fullnameOverride: spark-operator
+
+sparkAccess:
+  enabled: true
+  namespace: spark-apps
+  serviceAccountName: spark
+  clusterRole: edit
+
+sparkApplication:
+  enabled: false
+  name: spark-pi
+  namespace: spark-apps
+  image: gcr.io/spark-operator/spark:v3.1.1
+  imagePullPolicy: Always
+  mainClass: org.apache.spark.examples.SparkPi
+  mainApplicationFile: local:///opt/spark/examples/jars/spark-examples_2.12-3.1.1.jar
+  sparkVersion: "3.1.1"
+  driver:
+    cores: 1
+    coreLimit: "1200m"
+    memory: 512m
+    serviceAccount: spark
+    volumeMounts:
+      - name: test-volume
+        mountPath: /tmp
+  executor:
+    cores: 1
+    instances: 1
+    memory: 512m
+    volumeMounts:
+      - name: test-volume
+        mountPath: /tmp
+  volumes:
+    - name: test-volume
+      hostPath:
+        path: /tmp
+        type: Directory

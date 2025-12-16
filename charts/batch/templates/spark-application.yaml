@@ -1,0 +1,39 @@
+{{- if .Values.sparkApplication.enabled }}
+{{- $app := .Values.sparkApplication }}
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: {{ default (printf "%s-spark-app" .Release.Name) $app.name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ default .Release.Namespace $app.namespace }}
+spec:
+  type: Scala
+  mode: cluster
+  image: "{{ $app.image }}"
+  imagePullPolicy: {{ $app.imagePullPolicy }}
+  mainClass: "{{ $app.mainClass }}"
+  mainApplicationFile: "{{ $app.mainApplicationFile }}"
+  sparkVersion: "{{ $app.sparkVersion }}"
+  restartPolicy:
+    type: Never
+{{- if $app.volumes }}
+  volumes:
+{{ toYaml $app.volumes | indent 4 }}
+{{- end }}
+  driver:
+    cores: {{ $app.driver.cores }}
+    coreLimit: "{{ $app.driver.coreLimit }}"
+    memory: "{{ $app.driver.memory }}"
+    serviceAccount: "{{ $app.driver.serviceAccount }}"
+{{- if $app.driver.volumeMounts }}
+    volumeMounts:
+{{ toYaml $app.driver.volumeMounts | indent 6 }}
+{{- end }}
+  executor:
+    cores: {{ $app.executor.cores }}
+    instances: {{ $app.executor.instances }}
+    memory: "{{ $app.executor.memory }}"
+{{- if $app.executor.volumeMounts }}
+    volumeMounts:
+{{ toYaml $app.executor.volumeMounts | indent 6 }}
+{{- end }}
+{{- end }}
