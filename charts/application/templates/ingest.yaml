@@ -1,0 +1,64 @@
+{{- if .Values.config.ingest.enabled }}
+{{- $component := .Values.config.ingest.name | lower }}
+{{- $name := printf "%s-%s" .Release.Name $component | trunc 63 | trimSuffix "-" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    app: {{ $name }}
+spec:
+  replicas: {{ .Values.config.ingest.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+    spec:
+      containers:
+      - name: {{ $component }}
+        image: {{ .Values.config.docker_registry }}/{{ .Values.config.ingest.image }}:{{ .Values.config.ingest.tag }}
+        imagePullPolicy: {{ .Values.config.ingest.pullPolicy }}
+        env:
+          - name: SPARK_MASTER
+            value: {{ quote .Values.config.ingest.sparkMaster }}
+          - name: SPARK_APP_NAME
+            value: {{ quote .Values.config.ingest.appName }}
+          - name: INPUT_PATH
+            value: {{ quote .Values.config.ingest.inputPath }}
+          - name: INPUT_FORMAT
+            value: {{ quote .Values.config.ingest.inputFormat }}
+          - name: ID_COLUMN
+            value: {{ quote .Values.config.ingest.idColumn }}
+          - name: TEXT_COLUMN
+            value: {{ quote .Values.config.ingest.textColumn }}
+          - name: BATCH_SIZE
+            value: {{ quote .Values.config.ingest.batchSize }}
+          - name: VECTOR_SIZE
+            value: {{ quote .Values.config.ingest.vectorSize }}
+          - name: RUN_INTERVAL_SECONDS
+            value: {{ quote .Values.config.ingest.runIntervalSeconds }}
+          - name: REQUEST_TIMEOUT
+            value: {{ quote .Values.config.ingest.requestTimeout }}
+          - name: QDRANT_COLLECTION
+            value: {{ quote .Values.config.ingest.qdrant.collection }}
+          - name: QDRANT_DISTANCE
+            value: {{ quote .Values.config.ingest.qdrant.distance }}
+          - name: QDRANT_HOST
+            value: {{ quote .Values.config.ingest.qdrant.host }}
+          - name: QDRANT_PORT
+            value: {{ quote .Values.config.ingest.qdrant.port }}
+          - name: EMBEDDING_API_URL
+            value: {{ quote .Values.config.ingest.embeddingApiUrl }}
+          {{- if .Values.config.ingest.qdrant.apiKeySecretName }}
+          - name: QDRANT_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.config.ingest.qdrant.apiKeySecretName }}
+                key: {{ .Values.config.ingest.qdrant.apiKeySecretKey | default "api-key" }}
+                optional: false
+          {{- end }}
+{{- end }}

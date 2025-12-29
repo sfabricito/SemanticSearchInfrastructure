@@ -2,5 +2,8 @@ dependencies:
 - name: qdrant
   repository: https://qdrant.github.io/qdrant-helm
   version: 1.16.2
-digest: sha256:e410c6d977c030dcddb3f2b7ef8bffad57014ba708ec1f4f812a0b61472de64e
-generated: "2025-12-14T20:25:22.107437913-06:00"
+- name: rabbitmq-operator
+  repository: file://charts/rabbitmq-operator
+  version: 0.1.0
+digest: sha256:c3203ce25805b7729f6ec39ac9d1b53f9073006d776efac46e4b146905c0d6fd
+generated: "2025-12-16T22:09:24.89660998-06:00"
