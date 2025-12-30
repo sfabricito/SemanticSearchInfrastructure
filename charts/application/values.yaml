@@ -7,3 +7,28 @@ config:
     tag: "latest"
     pullPolicy: IfNotPresent
     port: 8000
+  ingest:
+    enabled: true
+    name: ingest
+    replicas: 1
+    image: ingest
+    tag: "latest"
+    pullPolicy: IfNotPresent
+    sparkMaster: "local[*]"
+    appName: "spark-qdrant-ingest"
+    inputPath: ""
+    inputFormat: "parquet"
+    idColumn: "id"
+    textColumn: "text"
+    batchSize: 64
+    vectorSize: 768
+    runIntervalSeconds: 600
+    requestTimeout: 30
+    embeddingApiUrl: "http://application-embedding-api:8000"
+    qdrant:
+      host: "databases-qdrant"
+      port: 6333
+      collection: "embeddings"
+      distance: "cosine"
+      apiKeySecretName: ""
+      apiKeySecretKey: ""
